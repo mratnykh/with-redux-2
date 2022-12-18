@@ -1,24 +1,42 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
+import create from "zustand";
 
-import counterReducer from './features/counter/counterSlice'
+const initialState = {
+  lastUpdate: 0,
+  light: false,
+  count: 0
+};
 
-export function makeStore() {
-  return configureStore({
-    reducer: { counter: counterReducer },
-  })
+export function initStore(preloadedState = initialState) {
+  return create((set, get) => ({
+    ...initialState,
+    ...preloadedState,
+    tick: (lastUpdate, light) => {
+      set({
+        lastUpdate,
+        light: !!light
+      });
+    },
+    setCount: (count) => {
+      set({
+        // @ts-ignore
+        count: count,
+      });
+    },
+    increment: () => {
+      set({
+        // @ts-ignore
+        count: get().count + 1
+      });
+    },
+    decrement: () => {
+      set({
+        count: get().count - 1
+      });
+    },
+    reset: () => {
+      set({
+        count: initialState.count
+      });
+    }
+  }));
 }
-
-const store = makeStore()
-
-export type AppState = ReturnType<typeof store.getState>
-
-export type AppDispatch = typeof store.dispatch
-
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  AppState,
-  unknown,
-  Action<string>
->
-
-export default store
