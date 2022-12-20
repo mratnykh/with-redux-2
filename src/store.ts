@@ -1,4 +1,5 @@
-import create from "zustand";
+import createStore from "zustand";
+import persist from './lib/persist'
 
 const initialState = {
   lastUpdate: 0,
@@ -7,7 +8,12 @@ const initialState = {
 };
 
 export function initStore(preloadedState = initialState) {
-  return create((set, get) => ({
+  return createStore(persist(
+    {
+      key: 'counter',
+      denylist: ['isLoading', 'errorMessage']
+    },
+    (set, get) => ({
     ...initialState,
     ...preloadedState,
     tick: (lastUpdate, light) => {
@@ -38,5 +44,6 @@ export function initStore(preloadedState = initialState) {
         count: initialState.count
       });
     }
-  }));
+  }),
+  ));
 }
