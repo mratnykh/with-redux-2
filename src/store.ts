@@ -1,18 +1,14 @@
-import createStore from "zustand";
-import persist from './lib/persist'
+import create from "zustand";
+// import persist from './lib/persist'
 
 const initialState = {
   lastUpdate: 0,
   light: false,
-  count: 0
+  count: 0,
 };
 
-export function initStore(preloadedState = initialState) {
-  return createStore(persist(
-    {
-      key: 'counter',
-      denylist: ['isLoading', 'errorMessage']
-    },
+export function useStore(preloadedState = initialState) {
+  return create(
     (set, get) => ({
     ...initialState,
     ...preloadedState,
@@ -45,5 +41,5 @@ export function initStore(preloadedState = initialState) {
       });
     }
   }),
-  ));
+  );
 }

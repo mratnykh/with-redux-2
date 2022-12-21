@@ -1,17 +1,17 @@
 import { Provider } from "../lib/zustandMiddleware";
 import Layout from '../components/layout'
-import { PersistGate } from 'zustand-persist'
+// import { PersistGate } from 'zustand-persist'
 
 export default function App({ Component, pageProps }) {
     const { initialZustandState, ...rest } = pageProps;
 
     return (
         <Provider createState={initialZustandState}>
-            <PersistGate>
+            {/*<PersistGate>*/}
                 <Layout>
                     <Component {...rest} />
                 </Layout>
-            </PersistGate>
+            {/*</PersistGate>*/}
         </Provider>
     );
 }

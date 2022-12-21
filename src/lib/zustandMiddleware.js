@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo } from "react";
 import { initStore } from "../store";
+import mergeDeepRight from "ramda/src/mergeDeepRight"
 
 export const StoreContext = createContext(null);
 
@@ -12,7 +13,7 @@ export function useHydrate(initialState) {
 }
 
 export const Provider = ({ children, createState }) => {
-    const store = useHydrate(createState, initStore);
+    const store = useHydrate(createState);
     return (
         <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
     );
@@ -33,10 +34,7 @@ export const initializeStore = (preloadedState) => {
     // After navigating to a page with an initial Zustand state, merge that state
     // with the current state in the store, and create a new store
     if (preloadedState && store) {
-        _store = initStore({
-            ...store.getState(),
-            ...preloadedState,
-        })
+        _store = initStore(mergeDeepRight(preloadedState, store.getState()));
         // Reset the current store
         store = undefined
     }

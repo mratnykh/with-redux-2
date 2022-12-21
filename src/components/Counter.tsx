@@ -15,6 +15,7 @@ export const useCounter = () => {
 
 const Counter = ({ initialZustandState }) => {
     const { count, increment, decrement, reset } = useCounter();
+    console.log(count)
 
     return (
         <div>
