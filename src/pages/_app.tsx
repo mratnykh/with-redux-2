@@ -1,17 +1,18 @@
-import { Provider } from "../lib/zustandMiddleware";
 import Layout from '../components/layout'
-// import { PersistGate } from 'zustand-persist'
+import useStore from "../store";
+import {useEffect} from "react";
 
 export default function App({ Component, pageProps }) {
-    const { initialZustandState, ...rest } = pageProps;
+    const { initialZustandState = {}, ...rest } = pageProps;
+    const hydrateState = useStore((state) => state.hydrateState);
+
+    useEffect(() => {
+      hydrateState(initialZustandState);
+    });
 
     return (
-        <Provider createState={initialZustandState}>
-            {/*<PersistGate>*/}
-                <Layout>
-                    <Component {...rest} />
-                </Layout>
-            {/*</PersistGate>*/}
-        </Provider>
+        <Layout>
+            <Component {...rest} />
+        </Layout>
     );
 }

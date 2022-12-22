@@ -1,21 +1,13 @@
-import { useProviderStore, initializeStore } from "../lib/zustandMiddleware";
+import useStore from "../store";
+import {useEffect, useState} from "react";
 
-export const useCounter = () => {
-    const { count, increment, decrement, reset } = useProviderStore(
-        (store) => ({
-            count: store.count,
-            increment: store.increment,
-            decrement: store.decrement,
-            reset: store.reset
-        }),
-    );
+const Counter = () => {
+    const { count, increment, decrement, reset, persistValue, incrementPersist } = useStore((state) => state);
+    let [localPersistValue, setLocalPersistValue] = useState(0);
 
-    return { count, increment, decrement, reset };
-};
-
-const Counter = ({ initialZustandState }) => {
-    const { count, increment, decrement, reset } = useCounter();
-    console.log(count)
+    useEffect(() => {
+        setLocalPersistValue(persistValue);
+    })
 
     return (
         <div>
@@ -25,6 +17,10 @@ const Counter = ({ initialZustandState }) => {
             <button onClick={increment}>+1</button>
             <button onClick={decrement}>-1</button>
             <button onClick={reset}>Reset</button>
+            <h2>
+                Count: <span>{localPersistValue}</span>
+            </h2>
+            <button onClick={incrementPersist}>+1</button>
         </div>
     );
 };

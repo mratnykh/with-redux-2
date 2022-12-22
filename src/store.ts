@@ -1,32 +1,31 @@
 import create from "zustand";
-// import persist from './lib/persist'
+import { persist } from 'zustand/middleware'
+import mergeDeepRight from "ramda/src/mergeDeepRight"
 
 const initialState = {
-  lastUpdate: 0,
-  light: false,
   count: 0,
+  isInitial: true,
+  persistValue: 0,
 };
 
-export function useStore(preloadedState = initialState) {
-  return create(
+const persistedKeys = ['persistValue'];
+
+const useStore = create(
+    persist(
     (set, get) => ({
     ...initialState,
-    ...preloadedState,
-    tick: (lastUpdate, light) => {
-      set({
-        lastUpdate,
-        light: !!light
-      });
-    },
-    setCount: (count) => {
-      set({
-        // @ts-ignore
-        count: count,
-      });
+    hydrateState: (hydratedState) => {
+      const state = get();
+
+      if (state.isInitial) {
+        const mergedState = mergeDeepRight(state, hydratedState);
+        set({ ...mergedState, isInitial: false });
+      } else {
+        set(mergeDeepRight(hydratedState, state));
+      }
     },
     increment: () => {
       set({
-        // @ts-ignore
         count: get().count + 1
       });
     },
@@ -39,7 +38,21 @@ export function useStore(preloadedState = initialState) {
       set({
         count: initialState.count
       });
-    }
+    },
+    incrementPersist: () => {
+        set({
+            persistValue: get().persistValue + 1
+        });
+    },
   }),
-  );
-}
+  {
+    name: 'koltron-next-storage', // name of item in the storage (must be unique),
+    getStorage: () => localStorage,
+    partialize: (state) =>
+      Object.fromEntries(
+        Object.entries(state).filter(([key]) => persistedKeys.includes(key))
+      ),
+  },
+))
+
+export default useStore;
