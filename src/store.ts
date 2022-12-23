@@ -1,11 +1,13 @@
 import create from "zustand";
 import { persist } from 'zustand/middleware'
 import mergeDeepRight from "ramda/src/mergeDeepRight"
+import { share, isSupported } from "shared-zustand"
 
 const initialState = {
   count: 0,
   isInitial: true,
   persistValue: 0,
+  fetchValue: 0,
 };
 
 const persistedKeys = ['persistValue'];
@@ -44,6 +46,11 @@ const useStore = create(
             persistValue: get().persistValue + 1
         });
     },
+    setFetchValue: (value) => {
+        set({
+            fetchValue: value,
+        })
+    }
   }),
   {
     name: 'koltron-next-storage', // name of item in the storage (must be unique),
@@ -54,5 +61,10 @@ const useStore = create(
       ),
   },
 ))
+
+if ("BroadcastChannel" in globalThis || isSupported()) {
+    // share the property "fetchValue" of the state with other tabs
+    share("fetchValue", useStore);
+}
 
 export default useStore;

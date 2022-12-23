@@ -1,12 +1,7 @@
 import type { NextApiHandler } from 'next'
 
-const countHandler: NextApiHandler = async (request, response) => {
-  const { amount = 1 } = request.body
-
-  // simulate IO latency
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  response.json({ data: amount })
+const countHandler: NextApiHandler = (request, response) => {
+  response.json({ count: Math.ceil(Math.random() * 10) })
 }
 
 export default countHandler

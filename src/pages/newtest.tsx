@@ -8,7 +8,10 @@ export const getServerSideProps = () => {
 
 const NewTestPage = () => {
     return (
-        <Counter />
+        <>
+            <h3>After reloading page the initial value is 21</h3>
+            <Counter />
+        </>
     );
 };
 
