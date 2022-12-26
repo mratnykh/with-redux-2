@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import useStore from "../store";
+import { useStore } from "../lib/zustandProvider";
 import epicMiddleware from '../lib/epicMiddleware';
+import Counter from "../components/Counter";
 
 const counterLink = 'http://localhost:3000/api/counter';
 
@@ -14,9 +15,12 @@ const FetchValueSetter = () => {
     }, [])
 
     return (
-        <p>
-            Entering this page initializes API calls for every 3 seconds. Calls stop after leaving the page.
-        </p>
+        <>
+            <p>
+                Entering this page initializes API calls for every 3 seconds. Calls stop after leaving the page.
+            </p>
+            <Counter />
+        </>
     );
 };
 

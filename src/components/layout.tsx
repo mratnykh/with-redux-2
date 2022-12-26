@@ -1,5 +1,5 @@
 import Link from "next/link"
-import useStore from "../store";
+import { useStore } from "../lib/zustandProvider";
 
 const links = [
     { href: '/', title: 'Index' },
@@ -9,8 +9,6 @@ const links = [
 ];
 
 export default function Layout({ children }) {
-    const { fetchValue } = useStore((state) => state);
-
     return (
         <>
             {links.map(link => (
@@ -21,9 +19,6 @@ export default function Layout({ children }) {
                 >{link.title}</Link>
             ))}
             <main>{children}</main>
-            <h2>
-                Observable value: <span>{fetchValue}</span>
-            </h2>
         </>
     )
 }

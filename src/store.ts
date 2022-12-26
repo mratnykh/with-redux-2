@@ -1,7 +1,6 @@
 import create from "zustand";
+import { useMemo } from 'react';
 import { persist } from 'zustand/middleware'
-import mergeDeepRight from "ramda/src/mergeDeepRight"
-import { share, isSupported } from "shared-zustand"
 
 const initialState = {
   count: 0,
@@ -10,61 +9,79 @@ const initialState = {
   fetchValue: 0,
 };
 
+let store
 const persistedKeys = ['persistValue'];
 
-const useStore = create(
-    persist(
-    (set, get) => ({
-    ...initialState,
-    hydrateState: (hydratedState) => {
-      const state = get();
+function initStore(preloadedState = initialState) {
+    return create(persist((set, get) => ({
+        ...initialState,
+        ...preloadedState,
+        setCountValue: (value) => {
+            set({
+                count: value,
+            })
+        },
+        setFetchValue: (value) => {
+            set({
+                fetchValue: value,
+            })
+        },
+        incrementPersist: () => {
+            set({
+                persistValue: get().persistValue + 1,
+            })
+        },
+        increment: () => {
+            set({
+                count: get().count + 1,
+            })
+        },
+        decrement: () => {
+            set({
+                count: get().count - 1,
+            })
+        },
+        reset: () => {
+            set({
+                count: initialState.count,
+            })
+        },
+    }),
+    {
+        name: 'koltron-next-storage', // name of item in the storage (must be unique),
+        getStorage: () => localStorage,
+        partialize: (state) =>
+            Object.fromEntries(
+                Object.entries(state).filter(([key]) => persistedKeys.includes(key))
+            ),
+    })
+)}
 
-      if (state.isInitial) {
-        const mergedState = mergeDeepRight(state, hydratedState);
-        set({ ...mergedState, isInitial: false });
-      } else {
-        set(mergeDeepRight(hydratedState, state));
-      }
-    },
-    increment: () => {
-      set({
-        count: get().count + 1
-      });
-    },
-    decrement: () => {
-      set({
-        count: get().count - 1
-      });
-    },
-    reset: () => {
-      set({
-        count: initialState.count
-      });
-    },
-    incrementPersist: () => {
-        set({
-            persistValue: get().persistValue + 1
-        });
-    },
-    setFetchValue: (value) => {
-        set({
-            fetchValue: value,
+export const initializeStore = (preloadedState) => {
+    let _store = store ?? initStore(preloadedState)
+
+    // After navigating to a page with an initial Zustand state, merge that state
+    // with the current state in the store, and create a new store
+    if (preloadedState && store) {
+        _store = initStore({
+            ...preloadedState,
+            ...store.getState(),
         })
+        // Reset the current store
+        store = undefined
     }
-  }),
-  {
-    name: 'koltron-next-storage', // name of item in the storage (must be unique),
-    getStorage: () => localStorage,
-    partialize: (state) =>
-      Object.fromEntries(
-        Object.entries(state).filter(([key]) => persistedKeys.includes(key))
-      ),
-  },
-))
 
-if ("BroadcastChannel" in globalThis || isSupported()) {
-    // share the property "fetchValue" of the state with other tabs
-    share("fetchValue", useStore);
+    // For SSG and SSR always create a new store
+    if (typeof window === 'undefined') return _store
+    // Create the store once in the client
+    if (!store) store = _store
+
+    return _store
 }
 
-export default useStore;
+export function useHydrate(initialState) {
+    const state =
+        typeof initialState === 'string' ? JSON.parse(initialState) : initialState
+    const store = useMemo(() => initializeStore(state), [state])
+    return store
+}
