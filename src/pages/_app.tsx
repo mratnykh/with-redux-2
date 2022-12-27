@@ -1,14 +1,19 @@
 import Layout from '../components/layout'
 import { useHydrate } from "../store";
 import { StoreProvider } from '../lib/zustandProvider'
-import { isSupported, share } from "shared-zustand";
+import { share, isSupported } from "../lib/sharedSubscribe";
+import { useEffect } from "react";
 
 export default function App({ Component, pageProps }) {
     const store = useHydrate(pageProps.initialZustandState)
-    if ("BroadcastChannel" in globalThis || isSupported()) {
-        // share the property "fetchValue" of the state with other tabs
-        share('fetchValue', store);
-    }
+
+    useEffect(() => {
+        if (isSupported()) {
+            const storeSharer = share(store)
+            return storeSharer('fetchValue')
+        }
+    })
+
 
     return (
         <StoreProvider store={store}>

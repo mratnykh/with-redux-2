@@ -1,6 +1,6 @@
 import create from "zustand";
 import { useMemo } from 'react';
-import { persist } from 'zustand/middleware'
+import { persist, subscribeWithSelector } from 'zustand/middleware'
 
 const initialState = {
   count: 0,
@@ -13,7 +13,8 @@ let store
 const persistedKeys = ['persistValue'];
 
 function initStore(preloadedState = initialState) {
-    return create(persist((set, get) => ({
+    // @ts-ignore
+    return create(persist(subscribeWithSelector((set, get) => ({
         ...initialState,
         ...preloadedState,
         setCountValue: (value) => {
@@ -46,7 +47,7 @@ function initStore(preloadedState = initialState) {
                 count: initialState.count,
             })
         },
-    }),
+    })),
     {
         name: 'koltron-next-storage', // name of item in the storage (must be unique),
         getStorage: () => localStorage,
